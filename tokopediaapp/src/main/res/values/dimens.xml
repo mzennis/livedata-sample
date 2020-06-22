@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen category="spacing" name="play_margin_top">32dp</dimen>
+    <dimen category="spacing" name="play_margin">16dp</dimen>
+
+    <dimen category="weight" name="play_weight_0">0dp</dimen>
+
+</resources>

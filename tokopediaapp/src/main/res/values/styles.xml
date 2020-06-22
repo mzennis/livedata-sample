@@ -1,0 +1,7 @@
+<resources>
+
+    <style name="Play.FullScreen" parent="@style/Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowActionBar">false</item>
+    </style>
+
+</resources>
