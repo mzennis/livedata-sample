@@ -37,8 +37,11 @@ class PlayViewModel @Inject constructor(private val videoManager: PlayVideoManag
         }
     }
 
+    // publicly exposed LiveData, not mutable
     val observableNewChat: LiveData<ChatUiModel> get() = _observableNewChat
+    // encapsulate access to mutable LiveData using backing property
     private val _observableNewChat = MutableLiveData<ChatUiModel>()
+
 
     private val userInfo = PlayMocker.getMockUserInfo()
 

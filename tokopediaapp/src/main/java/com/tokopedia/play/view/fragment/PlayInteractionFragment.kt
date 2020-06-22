@@ -31,11 +31,6 @@ class PlayInteractionFragment @Inject constructor(
     private lateinit var chatListView: PlayChatListView
     private lateinit var chatFormView: PlayChatFormView
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(requireActivity(), viewModelFactory).get(PlayViewModel::class.java)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -47,6 +42,11 @@ class PlayInteractionFragment @Inject constructor(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initView(view)
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        viewModel = ViewModelProvider(requireActivity(), viewModelFactory).get(PlayViewModel::class.java)
 
         observeContentInfo()
         observeTotalView()
@@ -89,6 +89,12 @@ class PlayInteractionFragment @Inject constructor(
     }
 
     private fun observeChatList() {
+
+        viewModel.observableNewChat.observe(viewLifecycleOwner,
+            Observer {
+                    newChat -> chatListView.addChat(newChat)
+            }
+        )
         viewModel.observableNewChat.observe(viewLifecycleOwner, Observer(chatListView::addChat))
     }
 }
