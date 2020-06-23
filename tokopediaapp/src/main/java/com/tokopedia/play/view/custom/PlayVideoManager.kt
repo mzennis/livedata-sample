@@ -26,7 +26,6 @@ class PlayVideoManager(private val context: Context) {
     private lateinit var videoPlayer: SimpleExoPlayer
     private lateinit var cache: Cache
 
-
     private val _observableVideoPlayer = MutableLiveData<SimpleExoPlayer>()
     private val _observablePlayVideoState = MutableLiveData<VideoState>()
 

@@ -5,7 +5,10 @@ import com.google.android.exoplayer2.SimpleExoPlayer
 import com.tokopedia.play.data.PlayMapper
 import com.tokopedia.play.data.PlayMocker
 import com.tokopedia.play.view.custom.PlayVideoManager
-import com.tokopedia.play.view.uimodel.*
+import com.tokopedia.play.view.uimodel.ChatUiModel
+import com.tokopedia.play.view.uimodel.ContentInfoUiModel
+import com.tokopedia.play.view.uimodel.TotalViewUiModel
+import com.tokopedia.play.view.uimodel.VideoPropertyUiModel
 import kotlinx.coroutines.*
 import javax.inject.Inject
 
@@ -44,9 +47,15 @@ class PlayViewModel @Inject constructor(private val videoManager: PlayVideoManag
             content -> content.id
     }
 
+    private val stateHandlerObserver = object : Observer<ContentInfoUiModel> {
+        override fun onChanged(t: ContentInfoUiModel?) {}
+    }
+    private val stateHandler: LiveData<ContentInfoUiModel> get() = MutableLiveData<ContentInfoUiModel>()
+
     private val userInfo = PlayMocker.getMockUserInfo()
 
     init {
+        stateHandler.observeForever(stateHandlerObserver)
         mockChat()
         mockTotalViews()
     }
@@ -89,6 +98,8 @@ class PlayViewModel @Inject constructor(private val videoManager: PlayVideoManag
 
     override fun onCleared() {
         super.onCleared()
+        videoManager.stop()
+        stateHandler.removeObserver(stateHandlerObserver)
         viewModelJob.cancel()
     }
 
