@@ -27,12 +27,8 @@ class PlayFragment @Inject constructor(
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_play, container, false)
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProvider(requireActivity(), viewModelFactory).get(PlayViewModel::class.java)
+        return inflater.inflate(R.layout.fragment_play, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

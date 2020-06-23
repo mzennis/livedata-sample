@@ -1,9 +1,6 @@
 package com.tokopedia.play.view.viewmodel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.tokopedia.play.data.PlayMapper
 import com.tokopedia.play.data.PlayMocker
@@ -42,6 +39,10 @@ class PlayViewModel @Inject constructor(private val videoManager: PlayVideoManag
     // encapsulate access to mutable LiveData using backing property
     private val _observableNewChat = MutableLiveData<ChatUiModel>()
 
+    // example map using livedata-ktx
+    val contentId = observableContentInfo.map {
+            content -> content.id
+    }
 
     private val userInfo = PlayMocker.getMockUserInfo()
 

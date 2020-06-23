@@ -13,6 +13,7 @@ import com.tokopedia.play.view.uimodel.VideoState
 object PlayMapper {
 
     fun getContentInfo(contentInfo: ContentInfo) = ContentInfoUiModel(
+        id = contentInfo.id,
         title = contentInfo.title,
         isLive = contentInfo.isLive
     )

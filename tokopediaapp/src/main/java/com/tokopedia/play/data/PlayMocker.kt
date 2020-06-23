@@ -11,6 +11,7 @@ import com.tokopedia.play.view.uimodel.ChatUiModel
 object PlayMocker {
 
     fun getMockContentInfo(): ContentInfo = ContentInfo(
+        id = "123",
         title = "Trend Fashion Pria Kekinian",
         isLive = true,
         totalView = 10L,
