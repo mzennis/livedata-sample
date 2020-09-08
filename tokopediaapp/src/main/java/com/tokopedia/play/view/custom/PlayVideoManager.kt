@@ -76,6 +76,7 @@ class PlayVideoManager(private val context: Context) {
 
     fun stop() {
         videoPlayer.stop()
+        cache.release()
     }
 
     fun setRepeatMode(shouldRepeat: Boolean) {
