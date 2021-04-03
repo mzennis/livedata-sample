@@ -12,8 +12,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class PlayActivity : AppCompatActivity() {
 
-    @Inject
-    lateinit var fragmentFactory: FragmentFactory
+    @Inject lateinit var fragmentFactory: FragmentFactory
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

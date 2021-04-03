@@ -1,4 +1,4 @@
-package com.tokopedia.play.data
+package com.tokopedia.play.view.uimodel.mapper
 
 import com.tokopedia.play.data.model.ContentInfo
 import com.tokopedia.play.view.uimodel.ContentInfoUiModel
@@ -22,7 +22,7 @@ object PlayMapper {
         totalView = contentInfo.totalView
     )
 
-    fun getVideoProperty() = VideoPropertyUiModel(
-        videoState = VideoState.NoMedia
+    fun getVideoProperty(input: VideoState) = VideoPropertyUiModel(
+        videoState = input
     )
 }

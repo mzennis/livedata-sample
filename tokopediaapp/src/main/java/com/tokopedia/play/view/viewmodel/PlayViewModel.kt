@@ -2,7 +2,7 @@ package com.tokopedia.play.view.viewmodel
 
 import androidx.lifecycle.*
 import com.google.android.exoplayer2.SimpleExoPlayer
-import com.tokopedia.play.data.PlayMapper
+import com.tokopedia.play.view.uimodel.mapper.PlayMapper
 import com.tokopedia.play.data.PlayMocker
 import com.tokopedia.play.view.custom.PlayVideoManager
 import com.tokopedia.play.view.uimodel.ChatUiModel
@@ -37,7 +37,7 @@ class PlayViewModel @Inject constructor(
     val observableVideoProperty: LiveData<VideoPropertyUiModel> get() = _observableVideoProperty
     private val _observableVideoProperty: MediatorLiveData<VideoPropertyUiModel> = MediatorLiveData<VideoPropertyUiModel>().apply {
         addSource(videoManager.getVideoState()) { videoState ->
-            value = VideoPropertyUiModel(videoState)
+            value = PlayMapper.getVideoProperty(videoState)
         }
     }
 
