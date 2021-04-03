@@ -5,33 +5,22 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentFactory
 import com.tokopedia.play.R
-import com.tokopedia.play.di.DaggerPlayComponent
-import com.tokopedia.play.di.PlayModule
 import com.tokopedia.play.view.fragment.PlayFragment
+import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-
+@AndroidEntryPoint
 class PlayActivity : AppCompatActivity() {
 
     @Inject
     lateinit var fragmentFactory: FragmentFactory
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        inject()
-        setFragmentFactory()
-
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_play)
+        setFragmentFactory()
         setupPage()
     }
-
-    private fun inject() {
-        DaggerPlayComponent.builder()
-            .playModule(PlayModule(this))
-            .build()
-            .inject(this)
-    }
-
     private fun setFragmentFactory() {
         supportFragmentManager.fragmentFactory = fragmentFactory
     }

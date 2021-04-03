@@ -4,10 +4,16 @@ import android.content.Context
 import com.tokopedia.play.view.custom.PlayVideoManager
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ActivityComponent
+import dagger.hilt.android.qualifiers.ApplicationContext
 
 @Module
-class PlayModule(private val context: Context) {
+@InstallIn(ActivityComponent::class)
+object PlayModule {
 
     @Provides
-    fun providePlayVideoManager(): PlayVideoManager = PlayVideoManager(context)
+    fun providePlayVideoManager(@ApplicationContext context: Context): PlayVideoManager {
+        return PlayVideoManager(context)
+    }
 }

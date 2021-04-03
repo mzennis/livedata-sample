@@ -9,6 +9,7 @@ import com.tokopedia.play.view.uimodel.ChatUiModel
 import com.tokopedia.play.view.uimodel.ContentInfoUiModel
 import com.tokopedia.play.view.uimodel.TotalViewUiModel
 import com.tokopedia.play.view.uimodel.VideoPropertyUiModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import javax.inject.Inject
 
@@ -16,7 +17,10 @@ import javax.inject.Inject
 /**
  * Created by mzennis on 15/06/20.
  */
-class PlayViewModel @Inject constructor(private val videoManager: PlayVideoManager): ViewModel() {
+@HiltViewModel
+class PlayViewModel @Inject constructor(
+    private val videoManager: PlayVideoManager
+): ViewModel() {
 
     private val viewModelJob = SupervisorJob()
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)

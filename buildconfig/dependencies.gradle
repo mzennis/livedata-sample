@@ -8,10 +8,11 @@ ext {
     androidConstraintLayoutVersion = '1.1.3'
     kotlinVersion = '1.3.72'
     recyclerViewVersion = '1.1.0-rc01'
-    fragmentKtxVersion = '1.1.0'
+    fragmentKtxVersion = '1.2.0'
     exoPlayerVersion = '2.11.1'
     glideVersion = '4.9.0'
     daggerVersion = '2.16'
+    hiltVersion = '2.33-beta'
 
     androidDependencies = [
             androidCore         : "androidx.core:core-ktx:${androidCoreVersion}",
@@ -19,7 +20,9 @@ ext {
             constraintLayout    : "androidx.constraintlayout:constraintlayout:${androidConstraintLayoutVersion}",
             kotlinSupport       : "org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}",
             recyclerView        : "androidx.recyclerview:recyclerview:${recyclerViewVersion}",
-            fragmentKtx         : "androidx.fragment:fragment-ktx:${fragmentKtxVersion}"
+            fragmentKtx         : "androidx.fragment:fragment-ktx:${fragmentKtxVersion}",
+            hiltAndroid         : "com.google.dagger:hilt-android:${hiltVersion}",
+            hiltCompiler        : "com.google.dagger:hilt-compiler:${hiltVersion}"
     ]
 
     playerDependencies = [

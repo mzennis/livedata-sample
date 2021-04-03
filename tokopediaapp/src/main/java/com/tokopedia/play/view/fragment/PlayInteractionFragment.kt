@@ -5,26 +5,25 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.tokopedia.play.R
 import com.tokopedia.play.view.component.PlayActionBarView
 import com.tokopedia.play.view.component.PlayChatFormView
 import com.tokopedia.play.view.component.PlayChatListView
 import com.tokopedia.play.view.component.PlayStatInfoView
 import com.tokopedia.play.view.viewmodel.PlayViewModel
-import com.tokopedia.play.view.viewmodel.ViewModelFactory
+import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 
 /**
  * Created by mzennis on 15/06/20.
  */
-class PlayInteractionFragment @Inject constructor(
-    private val viewModelFactory: ViewModelFactory
-): Fragment() {
+@AndroidEntryPoint
+class PlayInteractionFragment @Inject constructor(): Fragment() {
 
-    private lateinit var viewModel: PlayViewModel
+    private val viewModel: PlayViewModel by activityViewModels()
 
     private lateinit var actionBarView: PlayActionBarView
     private lateinit var statInfoView: PlayStatInfoView
@@ -36,7 +35,6 @@ class PlayInteractionFragment @Inject constructor(
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        viewModel = ViewModelProvider(requireActivity(), viewModelFactory).get(PlayViewModel::class.java)
         return inflater.inflate(R.layout.fragment_play_interaction, container, false)
     }
 
@@ -56,9 +54,9 @@ class PlayInteractionFragment @Inject constructor(
                     requireActivity().onBackPressed()
                 }
             })
-            statInfoView = PlayStatInfoView(this as ViewGroup)
-            chatListView = PlayChatListView(this as ViewGroup)
-            chatFormView = PlayChatFormView(this as ViewGroup, object : PlayChatFormView.Listener{
+            statInfoView = PlayStatInfoView(this)
+            chatListView = PlayChatListView(this)
+            chatFormView = PlayChatFormView(this, object : PlayChatFormView.Listener{
                 override fun onSendClicked(message: String) {
                     doSendChat(message)
                 }

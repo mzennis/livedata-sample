@@ -16,12 +16,14 @@ import com.google.android.exoplayer2.upstream.DefaultLoadErrorHandlingPolicy
 import com.google.android.exoplayer2.upstream.cache.*
 import com.google.android.exoplayer2.util.Util
 import com.tokopedia.play.view.uimodel.VideoState
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
+import javax.inject.Inject
 
 /**
  * Created by mzennis on 16/06/20.
  */
-class PlayVideoManager(private val context: Context) {
+class PlayVideoManager @Inject constructor(@ApplicationContext private val context: Context) {
 
     private lateinit var videoPlayer: SimpleExoPlayer
     private lateinit var cache: Cache
