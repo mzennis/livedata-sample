@@ -30,7 +30,7 @@ class PlayActivity : AppCompatActivity() {
 
     private fun setupPage() {
         supportFragmentManager.beginTransaction()
-            .replace(R.id.fl_container,  getFragmentByClassName(PlayFragment::class.java), PLAY_FRAGMENT_TAG)
+            .replace(R.id.fl_container, getFragmentByClassName(PlayFragment::class.java), PLAY_FRAGMENT_TAG)
             .commit()
     }
 
