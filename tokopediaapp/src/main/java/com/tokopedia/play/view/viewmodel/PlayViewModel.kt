@@ -2,15 +2,17 @@ package com.tokopedia.play.view.viewmodel
 
 import androidx.lifecycle.*
 import com.google.android.exoplayer2.SimpleExoPlayer
-import com.tokopedia.play.view.uimodel.mapper.PlayMapper
 import com.tokopedia.play.data.PlayMocker
 import com.tokopedia.play.view.custom.PlayVideoManager
 import com.tokopedia.play.view.uimodel.ChatUiModel
 import com.tokopedia.play.view.uimodel.ContentInfoUiModel
 import com.tokopedia.play.view.uimodel.TotalViewUiModel
 import com.tokopedia.play.view.uimodel.VideoPropertyUiModel
+import com.tokopedia.play.view.uimodel.mapper.PlayMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
@@ -21,9 +23,6 @@ import javax.inject.Inject
 class PlayViewModel @Inject constructor(
     private val videoManager: PlayVideoManager
 ): ViewModel() {
-
-    private val viewModelJob = SupervisorJob()
-    private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
     val observableContentInfo: LiveData<ContentInfoUiModel>
         get() = _observableContentInfo
@@ -65,7 +64,7 @@ class PlayViewModel @Inject constructor(
     }
 
     fun loadContent() {
-        uiScope.launch {
+        viewModelScope.launch {
             val contentInfo = PlayMocker.getMockContentInfo()
 
             startVideo(contentInfo.videoUrl)
@@ -81,7 +80,7 @@ class PlayViewModel @Inject constructor(
     }
 
     fun sendChat(message: String) {
-        uiScope.launch {
+        viewModelScope.launch {
             // TODO("send chat to the server")
             onRetrieveChat(
                 ChatUiModel(
@@ -104,11 +103,10 @@ class PlayViewModel @Inject constructor(
         super.onCleared()
         videoManager.stop()
         stateHandler.removeObserver(stateHandlerObserver)
-        viewModelJob.cancel()
     }
 
     private fun mockChat() {
-        uiScope.launch {
+        viewModelScope.launch {
             delay(2000)
             while(isActive) {
                 delay(2000)
@@ -118,7 +116,7 @@ class PlayViewModel @Inject constructor(
     }
 
     private fun mockTotalViews() {
-        uiScope.launch {
+        viewModelScope.launch {
             delay(3000)
             while(isActive) {
                 delay(1000)
