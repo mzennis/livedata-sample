@@ -1,6 +1,9 @@
 package com.tokopedia.play.view.viewmodel
 
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asFlow
+import androidx.lifecycle.viewModelScope
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.tokopedia.play.data.PlayMocker
 import com.tokopedia.play.view.custom.PlayVideoManager
@@ -13,9 +16,10 @@ import com.tokopedia.play.view.uimodel.event.ShowRealTimeChat
 import com.tokopedia.play.view.uimodel.event.UiEvent
 import com.tokopedia.play.view.uimodel.mapper.PlayMapper
 import com.tokopedia.play.view.uimodel.state.UiState
-import com.tokopedia.play.view.util.SingleLiveEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -26,32 +30,30 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class PlayViewModel @Inject constructor(
-    private val videoManager: PlayVideoManager
+    private val videoManager: PlayVideoManager,
 ): ViewModel() {
 
     val observableVideoPlayer: LiveData<SimpleExoPlayer> get() = videoManager.getVideoPlayer()
 
-    private val _contentInfo = MutableLiveData<ContentInfoUiModel>()
-    private val _totalView = MutableLiveData<TotalViewUiModel>()
+    private val _contentInfo = MutableStateFlow(ContentInfoUiModel.Empty)
+    private val _totalView = MutableStateFlow(TotalViewUiModel.Empty)
+    private val _videoState = videoManager.getVideoState().asFlow()
 
-    val uiState: LiveData<UiState>
-        get() = _uiState
-    private val _uiState: MediatorLiveData<UiState> = MediatorLiveData<UiState>().apply {
-        value = UiState.Initial
-        addSource(_contentInfo) { content ->
-            value = value?.copy(contentInfo = content)
-        }
-        addSource(_totalView) { totalView ->
-            value = value?.copy(totalView = totalView)
-        }
-        addSource(videoManager.getVideoState()) { videoState ->
-            value = value?.copy(videoUiState = PlayMapper.getVideoState(videoState))
-        }
-    }
+    val uiState: Flow<UiState> = combine(
+        _contentInfo,
+        _totalView,
+        _videoState,
+    ) { contentInfo, totalView, videoState ->
+        UiState(
+            contentInfo = contentInfo,
+            totalView = totalView,
+            videoUiState = PlayMapper.getVideoState(videoState)
+        )
+    }.flowOn(Dispatchers.Default)
 
-    val uiEvent: SingleLiveEvent<UiEvent>
+    val uiEvent: Flow<UiEvent>
         get() = _uiEvent
-    private val _uiEvent = SingleLiveEvent<UiEvent>()
+    private val _uiEvent = MutableSharedFlow<UiEvent>(extraBufferCapacity = 15)
 
     private val userInfo = PlayMocker.getMockUserInfo()
 
@@ -65,8 +67,8 @@ class PlayViewModel @Inject constructor(
     private fun loadContent() {
         viewModelScope.launch {
             val contentInfo = PlayMocker.getMockContentInfo()
-            _contentInfo.value = PlayMapper.getContentInfo(contentInfo)
-            _totalView.value = PlayMapper.getTotalView(contentInfo)
+            _contentInfo.emit(PlayMapper.getContentInfo(contentInfo))
+            _totalView.emit(PlayMapper.getTotalView(contentInfo))
 
             startVideo(contentInfo.videoUrl)
         }
@@ -91,7 +93,7 @@ class PlayViewModel @Inject constructor(
     }
 
     private fun onRetrieveChat(chat: ChatUiModel) {
-        _uiEvent.value = ShowRealTimeChat(chat)
+        _uiEvent.tryEmit(ShowRealTimeChat(chat))
     }
 
     private fun onRetrieveTotalViews(totalView: Long) {
@@ -125,7 +127,7 @@ class PlayViewModel @Inject constructor(
                 delay(1000)
                 onRetrieveTotalViews(
                     PlayMocker.getMockTotalView(
-                        currentTotalView = _totalView.value?.totalView?:0L
+                        currentTotalView = _totalView.value.totalView
                     )
                 )
             }

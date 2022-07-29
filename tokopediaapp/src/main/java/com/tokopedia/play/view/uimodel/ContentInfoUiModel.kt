@@ -9,4 +9,13 @@ data class ContentInfoUiModel(
     val title: String,
     val isLive: Boolean,
     val videoUrl: String,
-)
+) {
+    companion object {
+        val Empty = ContentInfoUiModel(
+            id = "",
+            title = "",
+            isLive = false,
+            videoUrl = "",
+        )
+    }
+}

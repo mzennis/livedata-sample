@@ -36,6 +36,8 @@ android {
 
 dependencies {
     implementation rootProject.ext.androidDependencies.kotlinSupport
+    implementation rootProject.ext.androidDependencies.coroutineAndroid
+    implementation rootProject.ext.androidDependencies.coroutineCore
 
     implementation rootProject.ext.androidDependencies.androidCore
     implementation rootProject.ext.androidDependencies.fragmentKtx

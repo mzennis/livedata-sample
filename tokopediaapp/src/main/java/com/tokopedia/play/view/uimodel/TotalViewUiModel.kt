@@ -6,4 +6,8 @@ package com.tokopedia.play.view.uimodel
  */
 data class TotalViewUiModel(
     val totalView: Long
-)
+) {
+    companion object {
+        val Empty = TotalViewUiModel(0)
+    }
+}

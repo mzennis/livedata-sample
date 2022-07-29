@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.ui.PlayerView
 import com.tokopedia.play.R
@@ -16,6 +17,7 @@ import com.tokopedia.play.view.uimodel.event.ShowRealTimeChat
 import com.tokopedia.play.view.uimodel.state.VideoUiState
 import com.tokopedia.play.view.viewmodel.PlayViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import javax.inject.Inject
 
 
@@ -73,27 +75,31 @@ class PlayFragment @Inject constructor(): Fragment() {
     }
 
     private fun observeUiState() {
-        viewModel.uiState.observe(viewLifecycleOwner, Observer {
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.uiState.collectLatest {
+                /**
+                 * todo: how to not redraw?
+                 */
 
-            /**
-             * todo: how to not redraw?
-             */
+                actionBarView.setTitle(it.contentInfo.title)
 
-            actionBarView.setTitle(it.contentInfo.title)
+                statInfoView.shouldShowBadgeLive(it.contentInfo.isLive)
+                statInfoView.setTotalView(it.totalView)
 
-            statInfoView.shouldShowBadgeLive(it.contentInfo.isLive)
-            statInfoView.setTotalView(it.totalView)
-
-            setVideoState(it.videoUiState)
-        })
+                setVideoState(it.videoUiState)
+            }
+        }
     }
 
     private fun observeUiEvent() {
-        viewModel.uiEvent.observe(viewLifecycleOwner, Observer {
-            when(it) {
-                is ShowRealTimeChat -> chatListView.addChat(it.chat)
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.uiEvent.collectLatest {
+                when(it) {
+                    is ShowRealTimeChat -> chatListView.addChat(it.chat)
+                }
             }
-        })
+        }
+
     }
 
     private fun setVideoState(videoState: VideoUiState) {
