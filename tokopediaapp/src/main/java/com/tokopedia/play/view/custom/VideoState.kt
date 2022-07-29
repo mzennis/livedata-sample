@@ -1,4 +1,4 @@
-package com.tokopedia.play.view.uimodel
+package com.tokopedia.play.view.custom
 
 
 /**

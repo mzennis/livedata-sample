@@ -7,5 +7,6 @@ package com.tokopedia.play.view.uimodel
 data class ContentInfoUiModel(
     val id: String,
     val title: String,
-    val isLive: Boolean
+    val isLive: Boolean,
+    val videoUrl: String,
 )

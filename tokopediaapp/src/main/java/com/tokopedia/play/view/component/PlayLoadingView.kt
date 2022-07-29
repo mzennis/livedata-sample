@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatImageView
 import com.bumptech.glide.Glide
 import com.tokopedia.play.R
-import com.tokopedia.play.view.uimodel.VideoState
+import com.tokopedia.play.view.uimodel.state.VideoUiState
 
 
 /**
@@ -17,10 +17,11 @@ class PlayLoadingView(
 
     private val imgLoading = container.findViewById<AppCompatImageView>(R.id.img_loading)
 
-    fun setVideoState(state: VideoState) {
+    fun setVideoState(state: VideoUiState) {
         when(state) {
-            is VideoState.Playing -> hideLoading()
-            is VideoState.NoMedia, VideoState.Buffering -> showLoading()
+            is VideoUiState.Loading -> showLoading()
+            is VideoUiState.Playing -> hideLoading()
+            is VideoUiState.Ended -> {}
         }
     }
 

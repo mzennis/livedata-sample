@@ -11,7 +11,9 @@ import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.ui.PlayerView
 import com.tokopedia.play.R
 import com.tokopedia.play.view.component.*
-import com.tokopedia.play.view.uimodel.VideoState
+import com.tokopedia.play.view.uimodel.action.SendChat
+import com.tokopedia.play.view.uimodel.event.ShowRealTimeChat
+import com.tokopedia.play.view.uimodel.state.VideoUiState
 import com.tokopedia.play.view.viewmodel.PlayViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -45,17 +47,10 @@ class PlayFragment @Inject constructor(): Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initView(view)
 
-        observeVideoProperty()
+        observeUiState()
+        observeUiEvent()
+
         observeVideoPlayer()
-        observeContentInfo()
-        observeTotalView()
-        observeChatList()
-
-        setupContent()
-    }
-
-    private fun setupContent() {
-        viewModel.loadContent()
     }
 
     private fun initView(view: View) {
@@ -77,36 +72,40 @@ class PlayFragment @Inject constructor(): Fragment() {
         }
     }
 
-    private fun setVideoState(videoState: VideoState) {
+    private fun observeUiState() {
+        viewModel.uiState.observe(viewLifecycleOwner, Observer {
+
+            /**
+             * todo: how to not redraw?
+             */
+
+            actionBarView.setTitle(it.contentInfo.title)
+
+            statInfoView.shouldShowBadgeLive(it.contentInfo.isLive)
+            statInfoView.setTotalView(it.totalView)
+
+            setVideoState(it.videoUiState)
+        })
+    }
+
+    private fun observeUiEvent() {
+        viewModel.uiEvent.observe(viewLifecycleOwner, Observer {
+            when(it) {
+                is ShowRealTimeChat -> chatListView.addChat(it.chat)
+            }
+        })
+    }
+
+    private fun setVideoState(videoState: VideoUiState) {
         playerLoadingView.setVideoState(videoState)
     }
 
-    private fun observeVideoProperty() {
-        viewModel.observableVideoProperty.observe(viewLifecycleOwner, Observer {
-            setVideoState(it.videoState)
-        })
+    private fun doSendChat(message: String) {
+        viewModel.dispatchAction(SendChat(message))
     }
 
     private fun observeVideoPlayer() {
         viewModel.observableVideoPlayer.observe(viewLifecycleOwner, Observer(this::setupPlayer))
-    }
-    private fun doSendChat(message: String) {
-        viewModel.sendChat(message)
-    }
-
-    private fun observeContentInfo() {
-        viewModel.observableContentInfo.observe(viewLifecycleOwner, Observer {
-            actionBarView.setTitle(it.title)
-            statInfoView.shouldShowBadgeLive(it.isLive)
-        })
-    }
-
-    private fun observeTotalView() {
-        viewModel.observableTotalView.observe(viewLifecycleOwner, Observer(statInfoView::setTotalView))
-    }
-
-    private fun observeChatList() {
-        viewModel.observableNewChat.observe(viewLifecycleOwner, Observer(chatListView::addChat))
     }
 
     private fun setupPlayer(player: SimpleExoPlayer) {

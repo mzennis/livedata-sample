@@ -7,8 +7,13 @@ import com.tokopedia.play.view.custom.PlayVideoManager
 import com.tokopedia.play.view.uimodel.ChatUiModel
 import com.tokopedia.play.view.uimodel.ContentInfoUiModel
 import com.tokopedia.play.view.uimodel.TotalViewUiModel
-import com.tokopedia.play.view.uimodel.VideoPropertyUiModel
+import com.tokopedia.play.view.uimodel.action.SendChat
+import com.tokopedia.play.view.uimodel.action.UiAction
+import com.tokopedia.play.view.uimodel.event.ShowRealTimeChat
+import com.tokopedia.play.view.uimodel.event.UiEvent
 import com.tokopedia.play.view.uimodel.mapper.PlayMapper
+import com.tokopedia.play.view.uimodel.state.UiState
+import com.tokopedia.play.view.util.SingleLiveEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -24,62 +29,56 @@ class PlayViewModel @Inject constructor(
     private val videoManager: PlayVideoManager
 ): ViewModel() {
 
-    val observableContentInfo: LiveData<ContentInfoUiModel>
-        get() = _observableContentInfo
-    private val _observableContentInfo = MutableLiveData<ContentInfoUiModel>()
-
-    val observableTotalView: LiveData<TotalViewUiModel> get() = _observableTotalView
-    private val _observableTotalView = MutableLiveData<TotalViewUiModel>()
-
     val observableVideoPlayer: LiveData<SimpleExoPlayer> get() = videoManager.getVideoPlayer()
 
-    val observableVideoProperty: LiveData<VideoPropertyUiModel> get() = _observableVideoProperty
-    private val _observableVideoProperty: MediatorLiveData<VideoPropertyUiModel> = MediatorLiveData<VideoPropertyUiModel>().apply {
+    private val _contentInfo = MutableLiveData<ContentInfoUiModel>()
+    private val _totalView = MutableLiveData<TotalViewUiModel>()
+
+    val uiState: LiveData<UiState>
+        get() = _uiState
+    private val _uiState: MediatorLiveData<UiState> = MediatorLiveData<UiState>().apply {
+        value = UiState.Initial
+        addSource(_contentInfo) { content ->
+            value = value?.copy(contentInfo = content)
+        }
+        addSource(_totalView) { totalView ->
+            value = value?.copy(totalView = totalView)
+        }
         addSource(videoManager.getVideoState()) { videoState ->
-            value = PlayMapper.getVideoProperty(videoState)
+            value = value?.copy(videoUiState = PlayMapper.getVideoState(videoState))
         }
     }
 
-    // publicly exposed LiveData, not mutable
-    val observableNewChat: LiveData<ChatUiModel> get() = _observableNewChat
-    // encapsulate access to mutable LiveData using backing property
-    private val _observableNewChat = MutableLiveData<ChatUiModel>()
-
-    // example map using livedata-ktx
-    val contentId = observableContentInfo.map {
-            content -> content.id
-    }
-
-    private val stateHandlerObserver = object : Observer<ContentInfoUiModel> {
-        override fun onChanged(t: ContentInfoUiModel?) {}
-    }
-    private val stateHandler: LiveData<ContentInfoUiModel> get() = MutableLiveData<ContentInfoUiModel>()
+    val uiEvent: SingleLiveEvent<UiEvent>
+        get() = _uiEvent
+    private val _uiEvent = SingleLiveEvent<UiEvent>()
 
     private val userInfo = PlayMocker.getMockUserInfo()
 
     init {
-        stateHandler.observeForever(stateHandlerObserver)
+        loadContent()
+
         mockChat()
         mockTotalViews()
     }
 
-    fun loadContent() {
+    private fun loadContent() {
         viewModelScope.launch {
             val contentInfo = PlayMocker.getMockContentInfo()
+            _contentInfo.value = PlayMapper.getContentInfo(contentInfo)
+            _totalView.value = PlayMapper.getTotalView(contentInfo)
 
             startVideo(contentInfo.videoUrl)
-
-            _observableContentInfo.value = PlayMapper.getContentInfo(contentInfo)
-            _observableTotalView.value = PlayMapper.getTotalView(contentInfo)
         }
     }
 
-    private fun startVideo(videoUrl: String) {
-        videoManager.play(videoUrl)
-        videoManager.setRepeatMode(true)
+    fun dispatchAction(action: UiAction) {
+        when (action) {
+            is SendChat -> sendChat(action.message)
+        }
     }
 
-    fun sendChat(message: String) {
+    private fun sendChat(message: String) {
         viewModelScope.launch {
             // TODO("send chat to the server")
             onRetrieveChat(
@@ -91,18 +90,22 @@ class PlayViewModel @Inject constructor(
         }
     }
 
-    private fun onRetrieveChat(chatUiModel: ChatUiModel) {
-        _observableNewChat.value = chatUiModel
+    private fun onRetrieveChat(chat: ChatUiModel) {
+        _uiEvent.value = ShowRealTimeChat(chat)
     }
 
     private fun onRetrieveTotalViews(totalView: Long) {
-        _observableTotalView.value = TotalViewUiModel(totalView)
+        _totalView.value = TotalViewUiModel(totalView)
+    }
+
+    private fun startVideo(videoUrl: String) {
+        videoManager.play(videoUrl)
+        videoManager.setRepeatMode(true)
     }
 
     override fun onCleared() {
         super.onCleared()
         videoManager.stop()
-        stateHandler.removeObserver(stateHandlerObserver)
     }
 
     private fun mockChat() {
@@ -122,7 +125,7 @@ class PlayViewModel @Inject constructor(
                 delay(1000)
                 onRetrieveTotalViews(
                     PlayMocker.getMockTotalView(
-                        currentTotalView = _observableTotalView.value?.totalView?:0L
+                        currentTotalView = _totalView.value?.totalView?:0L
                     )
                 )
             }
